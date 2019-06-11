@@ -2,19 +2,7 @@ window.navigator.userAgent = 'react-native';
 import React from 'react';
 import { YellowBox, StyleSheet, Text, TextInput, View, ScrollView, KeyboardAvoidingView } from 'react-native';
 import io from 'socket.io-client/dist/socket.io';
-
-// const connectionConfig = {
-//   jsonp: false,
-//   reconnection: true,
-//   reconnectionDelay: 100,
-//   reconnectionAttemps: 100000,
-//   transports: ["websocket"],
-// };
-
-// NetInfo.getConnectionInfo().then(state => {
-//   console.log("Connection type", state.type);
-//   console.log("Is connected?", state);
-// });
+import WifiManager from 'react-native-wifi';
 
 console.ignoredYellowBox = ['Remote debugger'];
 YellowBox.ignoreWarnings([
@@ -26,18 +14,27 @@ export default class LobbyChat extends React.Component {
   state = {
     message: '',
     sock: 'no socket connection',
-    logs: []
+    logs: [],
+    net: 'N/A'
   }
   constructor(props) {
     super(props)
     this.onSubmitEdit = this.onSubmitEdit.bind(this)
-    socket = io("http://10.11.89.152:3000");
-    // socket = io("http://192.168.0.15:3000");
-    // socket = io("http://192.168.0.7:3000");
+    socket = io("https://wich.herokuapp.com/");
   }
 
   componentDidMount() {
     socket.on('update', (msg) => { this.setState({ sock: 'Websocket Connected', logs: msg }) })
+    WifiManager.getCurrentWifiSSID()
+      .then((ssid) => {
+        this.setState({
+          net: ssid
+        })
+      }, () => {
+        this.setState({
+          net: 'failed'
+        })
+      })
   }
 
   onSubmitEdit() {
@@ -60,14 +57,14 @@ export default class LobbyChat extends React.Component {
             bottom: 0,
             margin: 0,
             padding: 0,
-          }}>WiFi Chat</Text>
+          }}>wifi lit</Text>
           <Text style={{
             color: 'black',
             alignSelf: 'center',
             top: 0,
             margin: 0,
             padding: 0,
-          }}> {this.state.sock} </Text>
+          }}> {this.state.sock} | {this.state.net} </Text>
         </View>
         <View style={{ flex: 16 }}>
           <ScrollView
